@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} - Jevi Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 1rem;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+        
+        .admin-portal {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-portal h2 {
+            color: #2d3748;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-portal p {
+            color: #718096;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background: #f7fafc;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        input:hover {
+            border-color: #cbd5e0;
+        }
+        
+        button {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 7px 14px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+            color: #c53030;
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.25rem;
+            display: none;
+            border-left: 4px solid #e53e3e;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            color: #2f855a;
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.25rem;
+            display: none;
+            border-left: 4px solid #38a169;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .forgot-password {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .forgot-password a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+        
+        .forgot-password a:hover {
+            color: #5a6fd8;
+            text-decoration: underline;
+        }
+        
+        .version-info {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            color: #a0aec0;
+            font-size: 0.8rem;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+            
+            .admin-portal h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .login-container {
+                background: #1a202c;
+                color: #e2e8f0;
+            }
+            
+            .admin-portal h2 {
+                color: #e2e8f0;
+            }
+            
+            .admin-portal p {
+                color: #a0aec0;
+            }
+            
+            label {
+                color: #e2e8f0;
+            }
+            
+            input {
+                background: #2d3748;
+                border-color: #4a5568;
+                color: #e2e8f0;
+            }
+            
+            input:focus {
+                background: #2d3748;
+                border-color: #667eea;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="admin-portal">
+            <h2>🔒 Admin Portal</h2>
+            <p>Secure access to Troika Chat administration dashboard</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Administrator Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your admin email" required autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Administrator Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" id="submitBtn">
+                <span class="loading-spinner" id="loadingSpinner"></span>
+                <span id="buttonText">Access Admin Dashboard</span>
+            </button>
+        </form>
+        
+        <div class="forgot-password">
+            <a href="#" onclick="handleForgotPassword()">Forgot your password?</a>
+        </div>
+        
+        <div class="version-info">
+            Troika Chat v1.0.0 | Secure Authentication
+        </div>
+    </div>
+    
+    <script>
+    // Enhanced login functionality
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const errorDiv = document.getElementById('errorMessage');
+        const successDiv = document.getElementById('successMessage');
+        const formData = new FormData(this);
+        
+        // Reset UI state
+        hideMessages();
+        setLoadingState(true);
+        
+        const loginData = {
+            email: formData.get('email').trim(),
+            password: formData.get('password')
+        };
+        
+        // Basic validation
+        if (!loginData.email || !loginData.password) {
+            showError('Please fill in all required fields.');
+            setLoadingState(false);
+            return;
+        }
+        
+        if (!isValidEmail(loginData.email)) {
+            showError('Please enter a valid email address.');
+            setLoadingState(false);
+            return;
+        }
+        
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(loginData),
+                credentials: 'include'
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                showSuccess('Login successful! Redirecting to dashboard...');
+                
+                // Delay redirect for better UX
+                setTimeout(() => {
+                    window.location.href = result.redirect || '/admin/dashboard';
+                }, 1500);
+            } else {
+                const errorMessage = result.error || result.message || 'Login failed. Please try again.';
+                showError(errorMessage);
+                setLoadingState(false);
+            }
+            
+        } catch (error) {
+            console.error('Login error:', error);
+            showError('Connection error. Please check your internet connection and try again.');
+            setLoadingState(false);
+        }
+    });
+    
+    // Utility functions
+    function setLoadingState(loading) {
+        const submitBtn = document.getElementById('submitBtn');
+        const buttonText = document.getElementById('buttonText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        
+        if (loading) {
+            submitBtn.disabled = true;
+            buttonText.textContent = 'Signing in...';
+            loadingSpinner.style.display = 'inline-block';
+        } else {
+            submitBtn.disabled = false;
+            buttonText.textContent = 'Access Admin Dashboard';
+            loadingSpinner.style.display = 'none';
+        }
+    }
+    
+    function showError(message) {
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 5000);
+    }
+    
+    function showSuccess(message) {
+        const successDiv = document.getElementById('successMessage');
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+    }
+    
+    function hideMessages() {
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'none';
+    }
+    
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    function handleForgotPassword() {
+        alert('Please contact your system administrator to reset your password.');
+    }
+    
+    // Auto-focus email field on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('email').focus();
+    });
+    
+    // Handle Enter key in password field
+    document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        }
+    });
+    
+    // Clear error messages when user starts typing
+    document.getElementById('email').addEventListener('input', hideMessages);
+    document.getElementById('password').addEventListener('input', hideMessages);
+    </script>
+</body>
+</html>

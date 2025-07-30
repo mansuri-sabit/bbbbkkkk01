@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-4">
+        <div class="bg-white rounded-lg shadow-lg h-96">
+            <!-- Chat Header -->
+            <div class="bg-blue-600 text-white p-4 rounded-t-lg">
+                <h2 class="text-xl font-bold">{{.project.Name}}</h2>
+                <p class="text-blue-100">{{.project.Description}}</p>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto h-64">
+                {{range .messages}}
+                <div class="mb-4 {{if .IsUser}}text-right{{else}}text-left{{end}}">
+                    <div class="inline-block max-w-xs lg:max-w-md px-4 py-2 rounded-lg {{if .IsUser}}bg-blue-600 text-white{{else}}bg-gray-200 text-gray-800{{end}}">
+                        {{if .IsUser}}{{.Message}}{{else}}{{.Response}}{{end}}
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                        {{.Timestamp.Format "15:04"}}
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            
+            <!-- Chat Input -->
+            <div class="border-t p-4">
+                <form id="chatForm" class="flex space-x-2">
+                    <input type="text" id="messageInput" placeholder="Type your message..." 
+                           class="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Send
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- PDF Upload -->
+        <div class="mt-6 bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Upload PDF Document</h3>
+            <form id="pdfForm" enctype="multipart/form-data">
+                <div class="flex items-center space-x-4">
+                    <input type="file" id="pdfFile" accept=".pdf" class="flex-1">
+                    <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                        Upload
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Iframe Code -->
+        <div class="mt-6 bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Embed Code</h3>
+            <p class="text-gray-600 mb-2">Copy this code to embed the chatbot on your website:</p>
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <code id="embedCode">
+&lt;iframe src="{{.baseURL}}/embed/{{.project.ID.Hex}}" 
+        width="400" 
+        height="600" 
+        frameborder="0"
+        style="border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"&gt;
+&lt;/iframe&gt;
+                </code>
+            </div>
+            <button onclick="copyEmbedCode()" class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Copy Code
+            </button>
+        </div>
+    </div>
+    
+    
+
+
+
+
+
+
+
+    <script>
+        // Chat functionality
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessageToChat(message, true);
+            messageInput.value = '';
+            
+            try {
+                const response = await axios.post(`/user/chat/{{.project.ID.Hex}}/message`, 
+                    new URLSearchParams({ message: message }));
+                
+                // Add bot response to chat
+                addMessageToChat(response.data.response, false);
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessageToChat('Sorry, there was an error processing your message.', false);
+            }
+        });
+        
+        // PDF upload functionality
+        document.getElementById('pdfForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('pdfFile');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('pdf', file);
+            
+            try {
+                const response = await axios.post(`/user/project/{{.project.ID.Hex}}/upload`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                
+                alert('PDF uploaded successfully!');
+                fileInput.value = '';
+            } catch (error) {
+                console.error('Error uploading PDF:', error);
+                alert('Error uploading PDF. Please try again.');
+            }
+        });
+        
+        function addMessageToChat(message, isUser) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `mb-4 ${isUser ? 'text-right' : 'text-left'}`;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour12: false, 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div class="inline-block max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'}">
+                    ${message}
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                    ${timeString}
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        function copyEmbedCode() {
+            const embedCode = document.getElementById('embedCode').textContent;
+            navigator.clipboard.writeText(embedCode).then(() => {
+                alert('Embed code copied to clipboard!');
+            });
+        }
+    </script>
+</body>
+</html>
