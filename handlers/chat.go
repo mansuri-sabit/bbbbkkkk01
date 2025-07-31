@@ -836,24 +836,6 @@ func checkRateLimit(userIP string) bool {
 	return chatRateLimiter.Allow(userIP)
 }
 
-// validateUserToken - Validate user authentication token
-func validateUserToken(token string) (string, error) {
-	// Simple token validation - implement proper JWT validation in production
-	if len(token) < 24 {
-		return "", fmt.Errorf("invalid token")
-	}
-
-	// Extract user ID from token (first 24 characters should be ObjectID)
-	userID := token[:24]
-
-	// Validate if it's a valid ObjectID
-	_, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return "", fmt.Errorf("invalid user ID in token")
-	}
-
-	return userID, nil
-}
 
 // RateMessage - Allow users to rate responses
 func RateMessage(c *gin.Context) {

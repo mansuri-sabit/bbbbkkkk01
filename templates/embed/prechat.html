@@ -1,181 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{{.project.Name}} - Authentication</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .auth-container {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      width: 100%;
-      max-width: 400px;
-      margin: 20px;
-    }
-    .auth-header { text-align: center; margin-bottom: 25px; }
-    .auth-header h2 { color: #333; margin-bottom: 5px; }
-    .auth-header p { color: #666; font-size: 0.9rem; }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
-    .form-group input {
-      width: 100%; padding: 12px 15px; border: 2px solid #e1e5e9;
-      border-radius: 8px; font-size: 14px;
-      transition: border-color 0.3s ease;
-    }
-    .form-group input:focus { border-color: #667eea; outline: none; }
-    .form-group input.error { border-color: #e74c3c; }
-    .error-message { color: #e74c3c; font-size: 0.8rem; margin-top: 5px; }
-    .auth-button {
-      width: 100%; padding: 12px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; border: none; border-radius: 8px;
-      font-size: 16px; font-weight: 500; cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .auth-button:hover { transform: translateY(-1px); }
-    .auth-button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .loading { display: none; text-align: center; margin-top: 15px; }
-    .toggle-mode { text-align: center; margin-top: 20px; }
-    .toggle-mode a { color: #667eea; text-decoration: none; font-size: 0.9rem; }
-    .toggle-mode a:hover { text-decoration: underline; }
-    .powered-by { text-align: center; margin-top: 20px; font-size: 0.8rem; color: #666; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.project.Name}} - Authentication</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .auth-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-header h2 {
+            color: #4267B2;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4267B2;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+
+        .auth-button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .login-button {
+            background: #4267B2;
+            color: white;
+        }
+
+        .login-button:hover {
+            background: #365899;
+        }
+
+        .register-button {
+            background: #42b883;
+            color: white;
+        }
+
+        .register-button:hover {
+            background: #369870;
+        }
+
+        .auth-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .mode-toggle {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 14px;
+        }
+
+        .mode-toggle a {
+            color: #4267B2;
+            text-decoration: none;
+        }
+
+        .mode-toggle a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-  <div class="auth-container">
-    <div class="auth-header">
-      <h2>{{.project.Name}}</h2>
-      <p>Please authenticate to start chatting</p>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>{{.project.Name}}</h2>
+            <p>Please sign in to start chatting</p>
+        </div>
+
+        <form id="auth-form">
+            <div class="form-group" id="name-group" style="display: none;">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" placeholder="Enter your full name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+
+            <div class="auth-buttons">
+                <button type="button" id="login-button" class="auth-button login-button">Sign In</button>
+                <button type="button" id="register-button" class="auth-button register-button">Sign Up</button>
+            </div>
+
+            <div class="error-message" id="error-message"></div>
+            <div class="success-message" id="success-message"></div>
+        </form>
     </div>
 
-    <!-- Login Form -->
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="loginEmail">Email Address</label>
-        <input type="email" id="loginEmail" required placeholder="Enter your email">
-        <div class="error-message" id="loginEmailError"></div>
-      </div>
-      <div class="form-group">
-        <label for="loginPassword">Password</label>
-        <input type="password" id="loginPassword" required placeholder="Enter your password">
-        <div class="error-message" id="loginPasswordError"></div>
-      </div>
-      <button type="submit" class="auth-button" id="loginButton">Sign In to Chat</button>
-      <div class="loading" id="loginLoading"><p>Authenticating...</p></div>
-      <div class="toggle-mode"><a href="#" onclick="toggleForm('register')">Don't have an account? Sign up</a></div>
-    </form>
+    <script>
+        const CONFIG = {
+            projectId: '{{.project_id}}',
+            apiUrl: '{{.api_url}}'
+        };
 
-    <!-- Registration Form -->
-    <form id="registerForm" style="display: none;">
-      <div class="form-group">
-        <label for="registerName">Full Name</label>
-        <input type="text" id="registerName" required placeholder="Enter your full name">
-        <div class="error-message" id="registerNameError"></div>
-      </div>
-      <div class="form-group">
-        <label for="registerEmail">Email Address</label>
-        <input type="email" id="registerEmail" required placeholder="Enter your email">
-        <div class="error-message" id="registerEmailError"></div>
-      </div>
-      <div class="form-group">
-        <label for="registerPassword">Password</label>
-        <input type="password" id="registerPassword" required placeholder="Create a password">
-        <div class="error-message" id="registerPasswordError"></div>
-      </div>
-      <button type="submit" class="auth-button" id="registerButton">Create Account & Chat</button>
-      <div class="loading" id="registerLoading"><p>Creating account...</p></div>
-      <div class="toggle-mode"><a href="#" onclick="toggleForm('login')">Already have an account? Sign in</a></div>
-    </form>
+        const form = document.getElementById('auth-form');
+        const nameGroup = document.getElementById('name-group');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-button');
+        const registerButton = document.getElementById('register-button');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
 
-    <div class="powered-by">Powered by <strong>Jevi Chat</strong></div>
-  </div>
+        let currentMode = 'login';
 
-  <script>
-    const projectId = '{{.project_id}}';
-   const apiUrl = (window.location.hostname === 'localhost'
-  ? 'http://localhost:8080'
-  : '');
+        // Event listeners
+        loginButton.addEventListener('click', () => authenticate('login'));
+        registerButton.addEventListener('click', () => authenticate('register'));
 
+        async function authenticate(mode) {
+            clearMessages();
 
-    function toggleForm(mode) {
-      document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
-      document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
-    }
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const name = nameInput.value.trim();
 
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
+            // Validation
+            if (!email || !password) {
+                showError('Please fill in all required fields');
+                return;
+            }
 
-      if (!validateEmail(email) || !password) {
-        showError('loginEmailError', 'Please enter valid credentials');
-        return;
-      }
+            if (mode === 'register' && !name) {
+                showError('Please enter your full name');
+                return;
+            }
 
-      await authenticateUser('login', { email, password });
-    });
+            // Disable buttons
+            setButtonsDisabled(true);
 
-    document.getElementById('registerForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const name = document.getElementById('registerName').value;
-      const email = document.getElementById('registerEmail').value;
-      const password = document.getElementById('registerPassword').value;
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/embed/${CONFIG.projectId}/auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        mode: mode,
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                });
 
-      if (!name || !validateEmail(email) || password.length < 6) {
-        showError('registerPasswordError', 'Password must be at least 6 characters');
-        return;
-      }
+                const data = await response.json();
 
-      await authenticateUser('register', { name, email, password });
-    });
-
-    async function authenticateUser(mode, userData) {
-      const button = document.getElementById(mode + 'Button');
-      const loading = document.getElementById(mode + 'Loading');
-      button.disabled = true;
-      loading.style.display = 'block';
-
-      try {
-        const res = await fetch(`${apiUrl}/embed/${projectId}/auth`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode, ...userData })
-        });
-        const data = await res.json();
-        if (data.success) {
-          sessionStorage.setItem('chatUser', JSON.stringify(data.user));
-          window.location.href = `${apiUrl}/embed/${projectId}?token=${data.token}`;
-        } else {
-          showError(mode + 'EmailError', data.message || 'Authentication failed');
+                if (data.success) {
+                    showSuccess(data.message);
+                    
+                    // Redirect to chat with token
+                    setTimeout(() => {
+                        window.location.href = `${CONFIG.apiUrl}/embed/${CONFIG.projectId}?token=${data.token}`;
+                    }, 1000);
+                } else {
+                    showError(data.message || 'Authentication failed');
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
+                showError('Connection error. Please try again.');
+            } finally {
+                setButtonsDisabled(false);
+            }
         }
-      } catch {
-        showError(mode + 'EmailError', 'Server error. Try again.');
-      } finally {
-        button.disabled = false;
-        loading.style.display = 'none';
-      }
-    }
 
-    function validateEmail(email) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
 
-    function showError(id, msg) {
-      const el = document.getElementById(id);
-      el.textContent = msg;
-      setTimeout(() => { el.textContent = ''; }, 5000);
-    }
-  </script>
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        function clearMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+
+        function setButtonsDisabled(disabled) {
+            loginButton.disabled = disabled;
+            registerButton.disabled = disabled;
+        }
+
+        // Show name field when register is clicked
+        registerButton.addEventListener('click', () => {
+            nameGroup.style.display = 'block';
+            nameInput.required = true;
+        });
+
+        loginButton.addEventListener('click', () => {
+            nameGroup.style.display = 'none';
+            nameInput.required = false;
+        });
+    </script>
 </body>
 </html>

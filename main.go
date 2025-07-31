@@ -158,21 +158,23 @@ func setupRoutes(r *gin.Engine) {
         })
     })
 
-    // Embed routes
-// ===== EMBED ROUTES (COMPLETELY PUBLIC) =====
+
+
+    // ===== EMBED ROUTES (PUBLIC WITH CONDITIONAL AUTH) =====
 embed := r.Group("/embed")
 embed.Use(handlers.RateLimitMiddleware("general"))
 {
-    // Public embed routes - NO authentication
-    embed.GET("/:projectId", handlers.EmbedChat)
-    embed.GET("/:projectId/chat", handlers.IframeChatInterface)
-    embed.GET("/:projectId/auth", handlers.EmbedAuth)
-    embed.POST("/:projectId/auth", handlers.EmbedAuth)
-    embed.POST("/:projectId/message", handlers.RateLimitMiddleware("chat"), handlers.IframeSendMessage)
-    embed.GET("/:projectId/history", handlers.GetChatHistory) // Chat history भी public
+    // Public embed routes
+    embed.GET("/:projectId", handlers.EmbedChat)                    // Main embed interface
+    embed.GET("/:projectId/auth", handlers.EmbedAuth)              // Show auth form
+    embed.POST("/:projectId/auth", handlers.EmbedAuth)             // Process auth
+    embed.GET("/:projectId/chat", handlers.IframeChatInterface)    // Direct iframe access
+    embed.POST("/:projectId/message", handlers.RateLimitMiddleware("chat"), handlers.IframeSendMessage) // Send message
+    embed.GET("/:projectId/history", handlers.GetChatHistory)      // Chat history
 }
 
-r.GET("/embed/health", handlers.EmbedHealth)
+r.GET("/embed/health", handlers.EmbedHealth) // Health check
+
 
 
     // Public Auth Routes
