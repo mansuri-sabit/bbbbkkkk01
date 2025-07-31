@@ -159,23 +159,21 @@ func setupRoutes(r *gin.Engine) {
     })
 
     // Embed routes
-    embed := r.Group("/embed/:projectId")
-    embed.Use(handlers.RateLimitMiddleware("general"))
-    {
-        embed.GET("", handlers.EmbedChat)
-        embed.GET("/chat", handlers.IframeChatInterface)
+// ===== EMBED ROUTES (COMPLETELY PUBLIC) =====
+embed := r.Group("/embed")
+embed.Use(handlers.RateLimitMiddleware("general"))
+{
+    // Public embed routes - NO authentication
+    embed.GET("/:projectId", handlers.EmbedChat)
+    embed.GET("/:projectId/chat", handlers.IframeChatInterface)
+    embed.GET("/:projectId/auth", handlers.EmbedAuth)
+    embed.POST("/:projectId/auth", handlers.EmbedAuth)
+    embed.POST("/:projectId/message", handlers.RateLimitMiddleware("chat"), handlers.IframeSendMessage)
+    embed.GET("/:projectId/history", handlers.GetChatHistory) // Chat history भी public
+}
 
-        auth := embed.Group("/auth")
-        auth.Use(handlers.RateLimitMiddleware("auth"))
-        {
-            auth.GET("", handlers.EmbedAuth)
-            auth.POST("", handlers.EmbedAuth)
-        }
+r.GET("/embed/health", handlers.EmbedHealth)
 
-        embed.POST("/message", handlers.RateLimitMiddleware("chat"), handlers.IframeSendMessage)
-    }
-
-    r.GET("/embed/health", handlers.EmbedHealth)
 
     // Public Auth Routes
     authRoutes := r.Group("/")
